@@ -33,10 +33,8 @@ public:
 		string cel = to_string(sum).erase(to_string(sum).find('.'));
 		string drob = to_string(sum).erase(0, to_string(sum).find('.') + 1);
 		if (drob.empty()) {
-			Double* temp = new Double;
-			temp->pCel = &cel;
-			temp->pDrob = &drob;
-			return *temp;
+			Double temp(cel);
+			return temp;
 		}
 		Double temp(cel, drob);
 		return temp;
@@ -169,7 +167,7 @@ istream& operator >> (istream& is, const Double& other)
 int main() {
 	int choice;
 	Double a, b;
-	cout << "a = " << a << "\nb = " << b << "\n\n1.summa\n2.raznost\n3.proizvedenie\n4.delenie\n5.sravnit( == || != )\n6.sravnit( > || <= )\n7.sravnit( >= || < )\n8.izmenit a\n9.izmenit b\n10.a = b\n11.vivesti a,b\n12.vihod\n\n";
+	cout << "a = " << a << "\nb = " << b << "\n\n1.summa\n2.raznost\n3.proizvedenie\n4.delenie\n5.sravnit( == || != )\n6.sravnit(  > || <= )\n7.sravnit( >= || <  )\n8.izmenit a\n9.izmenit b\n10.a = b\n11.vivesti a,b\n12.vihod\n\n";
 	do {
 		cin >> choice;
 		switch (choice) {
