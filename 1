@@ -1,223 +1,76 @@
-#include<iostream>
-#include<string>
-#include<cstring>
-#include<fstream>
+#include <iostream>
 using namespace::std;
 
-class Double {
-	string* pCel;
-	string* pDrob;
-public:
-	Double(string cel = "0", string drob = "0") {
-		pCel = new string(cel);
-		pDrob = new string(drob);
-	}
-	Double(const Double& other) {
-		this->pCel = new string(*other.pCel);
-		this->pDrob = new string(*other.pDrob);
-	}
-	~Double() {
-		delete this->pCel;
-		pCel = nullptr;
-		delete this->pDrob;
-		pDrob = nullptr;
-	}
-
-
-
-	Double operator+(const Double& other) {
-		string slag1, slag2;
-		slag1 = *this->pCel + "." + *this->pDrob;
-		slag2 = *other.pCel + "." + *other.pDrob;
-		double sum = stod(slag1) + stod(slag2);
-		string cel = to_string(sum).erase(to_string(sum).find('.'));
-		string drob = to_string(sum).erase(0, to_string(sum).find('.') + 1);
-		if (drob.empty()) {
-			Double temp(cel);
-			return temp;
-		}
-		Double temp(cel, drob);
-		return temp;
-	}
-
-	Double operator-(const Double& other) {
-		string slag1, slag2;
-		slag1 = *this->pCel + "." + *this->pDrob;
-		slag2 = *other.pCel + "." + *other.pDrob;
-		double raz = stod(slag1) - stod(slag2);
-		string cel = to_string(raz).erase(to_string(raz).find('.'));
-		string drob = to_string(raz);
-		drob.erase(0, drob.find('.') + 1);
-		if (drob.empty()) {
-			Double temp(cel);
-			return temp;
-		}
-		Double temp(cel, drob);
-		return temp;
-	}
-	Double operator*(const Double& other) {
-		string slag1, slag2;
-		slag1 = *this->pCel + "." + *this->pDrob;
-		slag2 = *other.pCel + "." + *other.pDrob;
-		double proizv = stod(slag1) * stod(slag2);
-		string cel = to_string(proizv).erase(to_string(proizv).find('.'));
-		string drob = to_string(proizv);
-		drob.erase(0, drob.find('.') + 1);
-		if (drob.empty()) {
-			Double temp(cel);
-			return temp;
-		}
-		Double temp(cel, drob);
-		return temp;
-	}
-	Double operator/(const Double& other) {
-		string slag1, slag2;
-		slag1 = *this->pCel + "." + *this->pDrob;
-		slag2 = *other.pCel + "." + *other.pDrob;
-		if (slag2 == "0.0") {
-			Double temp;
-			return temp;
-		}
-		double delenie = stod(slag1) / stod(slag2);
-		string cel = to_string(delenie).erase(to_string(delenie).find('.'));
-		string drob = to_string(delenie);
-		drob.erase(0, drob.find('.') + 1);
-		if (drob.empty()) {
-			Double temp(cel);
-			return temp;
-		}
-		Double temp(cel, drob);
-		return temp;
-	}
-
-
-
-	bool operator == (const Double& other) {
-		return ((*this->pCel == *other.pCel) && (*this->pDrob == *other.pDrob));
-	}
-	bool operator != (const Double& other) {
-		return !((*this->pCel == *other.pCel) && (*this->pDrob == *other.pDrob));
-	}
-
-
-	bool operator > (const Double& other) {
-		if (*this->pCel > *other.pCel)
-			return 1;
-		else
-			if ((*this->pCel == *other.pCel) && (*this->pDrob > *other.pDrob))
-				return 1;
-		return 0;
-	}
-	bool operator >= (const Double& other) {
-		if (*this->pCel > *other.pCel)
-			return 1;
-		else
-			if ((*this->pCel == *other.pCel) && (*this->pDrob >= *other.pDrob))
-				return 1;
-		return 0;
-	}
-
-
-	bool operator < (const Double& other) {
-		if (*this->pCel < *other.pCel)
-			return 1;
-		else
-			if ((*this->pCel == *other.pCel) && (*this->pDrob < *other.pDrob))
-				return 1;
-		return 0;
-	}
-	bool operator <= (const Double& other) {
-		if (*this->pCel < *other.pCel)
-			return 1;
-		else
-			if ((*this->pCel == *other.pCel) && (*this->pDrob <= *other.pDrob))
-				return 1;
-		return 0;
-	}
-
-
-
-	Double& operator = (const Double& other) {
-		if (this->pCel != nullptr)
-			delete this->pCel;
-		if (this->pDrob != nullptr)
-			delete this->pDrob;
-		this->pCel = new string(*other.pCel);
-		this->pDrob = new string(*other.pDrob);
-		return *this;
-	}
-
-
-	friend ostream& operator << (ostream& os, const Double& other);
-	friend istream& operator >> (istream& os, const Double& other);
+struct Node {
+	int data;
+	Node* next;
+	Node* prev;
 };
 
-ostream& operator << (ostream& os, const Double& other)
-{
-	os << *other.pCel << "." << *other.pDrob;
-	return os;
+void initList(Node* head, int elem) {
+	head->data = elem;
+	head->next = NULL;
+	head->prev = NULL;
 }
 
-istream& operator >> (istream& is, const Double& other)
-{
-	is >> *other.pCel >> *other.pDrob;
-	return is;
+void pushBack(Node* head, int elem) {
+	Node* value = new Node;
+	initList(value, elem);
+	while (head->next != NULL)
+		head = head->next;
+	value->prev = head;
+	head->next = value;
+}
+
+void printList(Node* head) {
+	int i = 1;
+	while (head != NULL) {
+		cout << i << "-й элемент списка: " << head->data << endl;
+		head = head->next;
+		i++;
+	}
+}
+
+void popEven(Node* head) {
+	int i = 1;
+	while (head) {
+		if (i % 2 == 0) {
+			head->prev->next = head->next;
+			if (head->next)
+				head->next->prev = head->prev;
+			Node* t = head;
+			head = head->next;
+			t->next = NULL;
+			t->prev = NULL;
+			delete t;
+		}
+		else
+			head = head->next;
+		i++;
+	}
 }
 
 int main() {
-	int choice;
-	Double a, b;
-	cout << "a = " << a << "\nb = " << b << "\n\n1.summa\n2.raznost\n3.proizvedenie\n4.delenie\n5.sravnit( == || != )\n6.sravnit(  > || <= )\n7.sravnit( >= || <  )\n8.izmenit a\n9.izmenit b\n10.a = b\n11.vivesti a,b\n12.vihod\n\n";
-	do {
-		cin >> choice;
-		switch (choice) {
-		case 1:
-			cout << "summa = " << a + b << endl;
-			break;
-		case 2:
-			cout << "raznost = " << a - b << endl;
-			break;
-		case 3:
-			cout << "proizvedenie = " << a * b << endl;
-			break;
-		case 4:
-			cout << "delenie = " << a / b << endl;
-			break;
-		case 5:
-			if (a == b)
-				cout << "a = b\n";
-			else
-				cout << "a != b\n";
-			break;
-		case 6:
-			if (a > b)
-				cout << "a > b\n";
-			else
-				cout << "a <= b\n";
-			break;
-		case 7:
-			if (a >= b)
-				cout << "a >= b\n";
-			else
-				cout << "a < b\n";
-			break;
-		case 8:
-			cout << "a = ";
-			cin >> a;
-			break;
-		case 9:
-			cout << "b = ";
-			cin >> b;
-			break;
-		case 10:
-			a = b;
-			break;
-		case 11:
-			cout << "a = " << a << "\nb = " << b << endl;
-			break;
-		default:
-			break;
-		}
-	} while (choice != 12);
+	setlocale(LC_ALL, "RU");
+	cout << "Введите количество элементов в списке: ";
+	int count;
+	cin >> count;
+	while (count <= 0) {
+		cout << "Количество элементов должно быть больше нуля: ";
+		cin >> count;
+	}
+	cout << "Введите 1-й элемент списка: ";
+	int x;
+	cin >> x;
+	Node* l = new Node;
+	initList(l, x);
+	for (int i = 1; i < count; i++) {
+		cout << "Введите " << i + 1 << "-й элемент списка: ";
+		cin >> x;
+		pushBack(l, x);
+	}
+	popEven(l);
+	cout << "\nНовый список:\n";
+	printList(l);
 	return 0;
 }
