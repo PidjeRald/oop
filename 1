@@ -1,360 +1,67 @@
-#include<iostream>
-#include<string>
-#include<cstring>
-#include<fstream>
+#include <iostream>
+#include <string>
 using namespace::std;
 
-class LongLong {
-	long first;
-	string second;
-public:
-	LongLong(long first = 0, string second = "0") {
-		this->first = first;
-		this->second = second;
-	}
-	LongLong(const LongLong& other) {
-		this->first = other.first;
-		this->second = other.second;
-	}
-
-	bool operator == (const LongLong& other) {
-		return ((this->first == other.first) && (this->second == other.second));
-	}
-	bool operator != (const LongLong& other) {
-		return !((this->first == other.first) && (this->second == other.second));
-	}
-
-	bool operator > (const LongLong& other) {
-		return ((this->first >= other.first) && (this->second > other.second));
-	}
-	bool operator >= (const LongLong& other) {
-		return ((this->first >= other.first) && (this->second >= other.second));
-	}
-
-	bool operator < (const LongLong& other) {
-		return ((this->first <= other.first) && (this->second < other.second));
-	}
-	bool operator <= (const LongLong& other) {
-		return ((this->first <= other.first) && (this->second <= other.second));
-	}
-
-	LongLong operator = (const LongLong& other) {
-		this->first = other.first;
-		this->second = other.second;
-		return *this;
-	}
-
-	string toString() {
-		if (first == 0)
-			return second;
-		return to_string(first) + second;
-	}
-
-	void setFirst(long first) {
-		this->first = first;
-	}
-	void setSecond(string second) {
-		this->second = second;
-	}
-
-	friend ostream& operator << (ostream& os, const LongLong& other);
-	friend istream& operator >> (istream& is, LongLong& other);
+struct Stack {
+	char data;
+	Stack* next;
 };
 
-ostream& operator << (ostream& os, const LongLong& other)
-{
-	if (other.first == 0 && !(other.second.empty()))
-		os << other.second;
-	else
-		os << other.first << other.second;
-	return os;
+void initStack(Stack* head, char elem) {
+	head->data = elem;
+	head->next = NULL;
 }
 
-istream& operator >> (istream& is, LongLong& other)
-{
-	is >> other.first >> other.second;
-	return is;
+void pushStack(Stack** head, char elem) {
+	Stack* t = new Stack;
+	initStack(t, elem);
+	t->next = *head;
+	*head = t;
 }
 
-class Double {
-	LongLong cel;
-	string* pDrob;
-public:
-	Double() {
-		cel.setFirst(0);
-		cel.setSecond("");
-		pDrob = new string("0");
-	}
-	Double(LongLong cel, string drob = "0") {
-		this->cel = cel;
-		pDrob = new string(drob);
-	}
-	Double(const Double& other) {
-		this->cel = other.cel;
-		this->pDrob = new string(*other.pDrob);
-	}
-	~Double() {
-		delete pDrob;
-		pDrob = nullptr;
-	}
-
-
-
-	Double operator + (const Double& other) {
-		LongLong a = other.cel;
-		string slag1, slag2;
-		slag1 = this->cel.toString() + "." + *this->pDrob;
-		slag2 = a.toString() + "." + *other.pDrob;
-		long double sum = stold(slag1) + stold(slag2);
-		string cel = to_string(sum).erase(to_string(sum).find('.'));
-		string drob = to_string(sum).erase(0, to_string(sum).find('.') + 1);
-		long first;
-		if (cel.length() > 9) {
-			string str{};
-			for (int i = 0; i < 9; i++)
-				str += cel[i];
-			first = stol(str);
-			cel.erase(0, 9);
-			a.setFirst(first);
-			a.setSecond(cel);
-		}
-		else {
-			first = stol(cel);
-			a.setFirst(first);
-			a.setSecond("");
-		}
-		if (drob.empty()) {
-			Double temp(a);
-			return temp;
-		}
-		Double temp(a, drob);
-		return temp;
-	}
-
-	Double operator - (const Double& other) {
-		LongLong a = other.cel;
-		string slag1, slag2;
-		slag1 = this->cel.toString() + "." + *this->pDrob;
-		slag2 = a.toString() + "." + *other.pDrob;
-		long double raz = stold(slag1) - stold(slag2);
-		string cel = to_string(raz).erase(to_string(raz).find('.'));
-		string drob = to_string(raz).erase(0, to_string(raz).find('.') + 1);
-		long first;
-		if (cel.length() > 9) {
-			string str{};
-			for (int i = 0; i < 9; i++)
-				str += cel[i];
-			first = stol(str);
-			cel.erase(0, 9);
-			a.setFirst(first);
-			a.setSecond(cel);
-		}
-		else {
-			first = stol(cel);
-			a.setFirst(first);
-			a.setSecond("");
-		}
-		if (drob.empty()) {
-			Double temp(a);
-			return temp;
-		}
-		Double temp(a, drob);
-		return temp;
-	}
-	Double operator * (const Double& other) {
-		LongLong a = other.cel;
-		string slag1, slag2;
-		slag1 = this->cel.toString() + "." + *this->pDrob;
-		slag2 = a.toString() + "." + *other.pDrob;
-		long double proizv = stold(slag1) * stold(slag2);
-		string cel = to_string(proizv).erase(to_string(proizv).find('.'));
-		string drob = to_string(proizv).erase(0, to_string(proizv).find('.') + 1);
-		long first;
-		if (cel.length() > 9) {
-			string str{};
-			for (int i = 0; i < 9; i++)
-				str += cel[i];
-			first = stol(str);
-			cel.erase(0, 9);
-			a.setFirst(first);
-			a.setSecond(cel);
-		}
-		else {
-			first = stol(cel);
-			a.setFirst(first);
-			a.setSecond("");
-		}
-		if (drob.empty()) {
-			Double temp(a);
-			return temp;
-		}
-		Double temp(a, drob);
-		return temp;
-	}
-	Double operator / (const Double& other) {
-		LongLong a = other.cel;
-		string slag1, slag2;
-		slag1 = this->cel.toString() + "." + *this->pDrob;
-		slag2 = a.toString() + "." + *other.pDrob;
-		if (slag2 == "0.0") {
-			Double temp;
-			return temp;
-		}
-		long double delenie = stold(slag1) / stold(slag2);
-		string cel = to_string(delenie).erase(to_string(delenie).find('.'));
-		string drob = to_string(delenie).erase(0, to_string(delenie).find('.') + 1);
-		long first;
-		if (cel.length() > 9) {
-			string str{};
-			for (int i = 0; i < 9; i++)
-				str += cel[i];
-			first = stol(str);
-			cel.erase(0, 9);
-			a.setFirst(first);
-			a.setSecond(cel);
-		}
-		else {
-			first = stol(cel);
-			a.setFirst(first);
-			a.setSecond("");
-		}
-		if (drob.empty()) {
-			Double temp(a);
-			return temp;
-		}
-		Double temp(a, drob);
-		return temp;
-	}
-
-	bool operator == (const Double& other) {
-		return ((this->cel == other.cel) && (*this->pDrob == *other.pDrob));
-	}
-	bool operator != (const Double& other) {
-		return !((this->cel == other.cel) && (*this->pDrob == *other.pDrob));
-	}
-
-	bool operator > (const Double& other) {
-		if (this->cel > other.cel)
-			return 1;
-		else
-			if ((this->cel == other.cel) && (*this->pDrob > *other.pDrob))
-				return 1;
-		return 0;
-	}
-	bool operator >= (const Double& other) {
-		if (this->cel > other.cel)
-			return 1;
-		else
-			if ((this->cel == other.cel) && (*this->pDrob >= *other.pDrob))
-				return 1;
-		return 0;
-	}
-
-	bool operator < (const Double& other) {
-		if (this->cel > other.cel)
-			return 1;
-		else
-			if ((this->cel == other.cel) && (*this->pDrob < *other.pDrob))
-				return 1;
-		return 0;
-	}
-	bool operator <= (const Double& other) {
-		if (this->cel > other.cel)
-			return 1;
-		else
-			if ((this->cel == other.cel) && (*this->pDrob <= *other.pDrob))
-				return 1;
-		return 0;
-	}
-
-	Double& operator = (const Double& other) {
-		this->cel = other.cel;
-		if (this->pDrob != nullptr)
-			delete this->pDrob;
-		this->pDrob = new string(*other.pDrob);
-		return *this;
-	}
-
-	friend ostream& operator << (ostream& os, const Double& other);
-	friend istream& operator >> (istream& os, Double& other);
-};
-
-ostream& operator << (ostream& os, const Double& other)
-{
-	if ((*other.pDrob).length() > 1) {
-		string str = *other.pDrob;
-		int n = (*other.pDrob).length() - 1;
-		while (n != 0 && (*other.pDrob)[n] == '0') {
-			str.erase(n);
-			n--;
-		}
-		os << other.cel << "." << str;
-		return os;
-	}
-	os << other.cel << "." << *other.pDrob;
-	return os;
-}
-
-istream& operator >> (istream& is, Double& other)
-{
-	is >> other.cel >> *other.pDrob;
-	return is;
+Stack* popStack(Stack** head) {
+	Stack* t = *head;
+	*head = (*head)->next;
+	t->next = NULL;
+	return t;
 }
 
 int main() {
-	int choice;
-	Double a, b;
-	cout << "a = " << a << "\nb = " << b << "\n\n1.summa\n2.raznost\n3.proizvedenie\n4.delenie\n5.sravnit( == || != )\n6.sravnit(  > || <= )\n7.sravnit( >= || <  )\n8.izmenit a\n9.izmenit b\n10.a = b\n11.vivesti a,b\n12.vihod\n\n";
+	setlocale(LC_ALL, "RU");
+	Stack* s = new Stack;
+	initStack(s, '0');
+	cout << "Введите текст: ";
+	bool f = 0;
+	char ch;
 	do {
-		cin >> choice;
-		switch (choice) {
-		case 1:
-			cout << "summa = " << a + b << endl;
-			break;
-		case 2:
-			cout << "raznost = " << a - b << endl;
-			break;
-		case 3:
-			cout << "proizvedenie = " << a * b << endl;
-			break;
-		case 4:
-			cout << "delenie = " << a / b << endl;
-			break;
-		case 5:
-			if (a == b)
-				cout << "a = b\n";
+		cin >> ch;
+		if (ch == '(' || ch == '[' || ch == '{' || ch == '}' || ch == ']' || ch == ')')
+			if ((ch == ')' || ch == ']' || ch == '}') && s->data == '0')
+				f = 1;
 			else
-				cout << "a != b\n";
-			break;
-		case 6:
-			if (a > b)
-				cout << "a > b\n";
-			else
-				cout << "a <= b\n";
-			break;
-		case 7:
-			if (a >= b)
-				cout << "a >= b\n";
-			else
-				cout << "a < b\n";
-			break;
-		case 8:
-			cout << "a = ";
-			cin >> a;
-			break;
-		case 9:
-			cout << "b = ";
-			cin >> b;
-			break;
-		case 10:
-			a = b;
-			break;
-		case 11:
-			cout << "a = " << a << "\nb = " << b << endl;
-			break;
-		default:
-			break;
-		}
-	} while (choice != 12);
+				switch (ch) {
+				case ')':
+					if (popStack(&s)->data != '(')
+						f = 1;
+					break;
+				case ']':
+					if (popStack(&s)->data != '[')
+						f = 1;
+					break;
+				case '}':
+					if (popStack(&s)->data != '{')
+						f = 1;
+					break;
+				default:
+					pushStack(&s, ch);
+					break;
+				}
+	} while (ch != '0');
+	if (s->next != NULL)
+		f = 1;
+	if (f)
+		cout << "Вы ошиблись!";
+	else
+		cout << "Всё правильно!";
 	return 0;
 }
