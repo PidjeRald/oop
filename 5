@@ -1,0 +1,63 @@
+#include <iostream>
+#include <string>
+using namespace::std;
+
+struct Stack {
+	string data;
+	Stack* next;
+};
+
+void initStack(Stack* head, string elem) {
+	head->data = elem;
+	head->next = NULL;
+}
+
+void pushStack(Stack** head, string elem) {
+	Stack* t = new Stack;
+	initStack(t, elem);
+	t->next = *head;
+	*head = t;
+}
+
+Stack* popStack(Stack** head) {
+	Stack* t = *head;
+	*head = (*head)->next;
+	t->next = NULL;
+	return t;
+}
+
+int main() {
+	setlocale(LC_ALL, "RU");
+	cout << "Введите количество элементов: ";
+	int count;
+	cin >> count;
+	cout << "Введите элементы: ";
+	char ch;
+	cin >> ch;
+	string str;
+	str = ch;
+	Stack* s = new Stack;
+	initStack(s, str);
+	for (int i = 0; i < count - 1; i++) {
+		cin >> ch;
+		if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
+			if (ch == '*' || ch == '/') {
+				string t = popStack(&s)->data;
+				if (t.find('+') != string::npos || t.find('-') != string::npos)
+					t = "(" + t + ")";
+				if (s->data.find('+') != string::npos || s->data.find('-') != string::npos)
+					s->data = "(" + s->data + ")";
+				pushStack(&s, popStack(&s)->data + ch + t);
+			}
+			else
+				pushStack(&s, popStack(&s)->data + ch + popStack(&s)->data);
+		}
+		else {
+			str = ch;
+			pushStack(&s, str);
+		}
+	}
+	cout << s->data;
+	return 0;
+}
+// 8 2 5 * + 1 3 2 * + 4 - /
