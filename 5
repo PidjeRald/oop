@@ -1,264 +1,80 @@
+M(5.m(6.8))
+
 #include <iostream>
+#include <fstream>
 #include <string>
-#include "AndArray.h"
-#include "OrArray.h"
 using namespace::std;
+using TElem = char;
+
+struct Stack {
+	TElem data;
+	Stack* next;
+};
+
+void pushStack(Stack*& top, TElem x) {
+	Stack* t = new Stack;
+	t->data = x;
+	t->next = top;
+	top = t;
+}
+
+TElem popStack(Stack*& top) {
+	TElem x = top->data;
+	if (top->next == NULL) {
+		delete top;
+		top = NULL;
+	}
+	else {
+		Stack* t = new Stack;
+		t = top;
+		top = top->next;
+		t->next = NULL;
+		delete t;
+	}
+	return x;
+}
+
+int M(int a, int b) {
+	if (a > b)
+		return a;
+	else
+		return b;
+}
+
+int m(int a, int b) {
+	if (a < b)
+		return a;
+	else
+		return b;
+}
 
 int main() {
-    AndArray a1("0"), a2("0");
-    OrArray b1("0"), b2("0");
-    int n = 0;
-    double x = 0;
-    int choice = 0;
-    cout << "AndArray\n1.izmenit a1\n2.izmenit a2\n3.a1.add(a2)\n4.a1.forEach()\n\nOrArray\n5.izmenit b1\n6.izmenit b2\n7.b1.add(b2)\n8.b1.forEach()\n\n";
-    do {
-        cin >> choice;
-        switch (choice) {
-        case 1:
-            cout << "n = ";
-            cin >> n;
-            a1.reSize(n);
-            for (int i = 0; i < n; i++) {
-                cout << "a1[" << i << "] = ";
-                cin >> x;
-                a1[i] = x;
-            }
-            break;
-        case 2:
-            cout << "n = ";
-            cin >> n;
-            a2.reSize(n);
-            for (int i = 0; i < n; i++) {
-                cout << "a2[" << i << "] = ";
-                cin >> x;
-                a2[i] = x;
-            }
-            break;
-        case 3:
-            a1.add(a2);
-            cout << "a1.add(a2): " << a1 << endl;
-            break;
-        case 4:
-            a1.forEach();
-            cout << "a1.forEach(): " << a1 << endl;
-            break;
-        case 5:
-            cout << "n = ";
-            cin >> n;
-            b1.reSize(n);
-            for (int i = 0; i < n; i++) {
-                cout << "a1[" << i << "] = ";
-                cin >> x;
-                b1[i] = x;
-            }
-            break;
-        case 6:
-            cout << "n = ";
-            cin >> n;
-            b2.reSize(n);
-            for (int i = 0; i < n; i++) {
-                cout << "a1[" << i << "] = ";
-                cin >> x;
-                b2[i] = x;
-            }
-            break;
-        case 7:
-            b1.add(b2);
-            cout << "b1.add(b2): " << b1 << endl;
-            break;
-        case 8:
-            b1.forEach();
-            cout << "b1.forEach(): " << b1 << endl;
-            break;
-        default:
-            break;
-        }
-    } while (choice != 9);
-    return 0;
-}
-
-
-#pragma once
-#include <string>
-#include <iostream>
-using namespace::std;
-
-class Array {
-protected:
-    double* arrPtr;
-    int arraySize;
-public:
-    Array(string);
-    Array(const Array&);
-    ~Array();
-    int size();
-    void reSize(int);
-    bool exists(double a);
-    double& operator[](int);
-    virtual void add(Array&) = 0;
-    virtual void forEach() = 0;
-    friend ostream& operator << (ostream& os, const Array& other);
-};
-
-
-#include "Array.h"
-
-Array::Array(string str) {
-    if (str.find(',') == string::npos) {
-        arrPtr = new double[1];
-        arrPtr[0] = 0;
-        arraySize = 1;
-    }
-    else {
-        int size = 1;
-        for (int i = 0; i < str.length(); i++)
-            if (str[i] == ',' && i != str.length() - 1)
-                size++;
-        arraySize = size;
-        arrPtr = new double[arraySize];
-        for (int i = 0; i < arraySize; i++) {
-            string t{};
-            int n = str.length();
-            if (str.find(',') != string::npos)
-                n = str.find(',');
-            for (int j = 0; j < n; j++)
-                t += str[j];
-            arrPtr[i] = stod(t);
-            str.erase(0, t.length() + 1);
-        }
-    }
-}
-
-Array::Array(const Array& other) {
-    arraySize = other.arraySize;
-    arrPtr = new  double[arraySize];
-    for (int i = 0; i < arraySize; i++)
-        arrPtr[i] = other.arrPtr[i];
-}
-
-Array::~Array() {
-    delete[]arrPtr;
-}
-
-double& Array::operator[](int i) {
-    return arrPtr[i];
-}
-
-bool Array::exists(double value) {
-    for (int i = 0; i < arraySize; i++)
-        if (arrPtr[i] == value)
-            return true;
-    return false;
-}
-
-int Array::size() {
-    return arraySize;
-}
-
-void Array::reSize(int size) {
-    int n = size;
-    if (size > arraySize)
-        n = arraySize;
-    double* t = new double[n];
-    for (int i = 0; i < n; i++)
-        t[i] = arrPtr[i];
-    delete[]arrPtr;
-    arraySize = size;
-    arrPtr = new double[arraySize];
-    for (int i = 0; i < n; i++)
-        arrPtr[i] = t[i];
-    delete[]t;
-}
-
-ostream& operator << (ostream& os, const Array& other) {
-    for (int i = 0; i < other.arraySize; i++)
-        os << other.arrPtr[i] << " ";
-    return os;
-}
-
-
-#pragma once
-#include "Array.h"
-
-class AndArray : public Array {
-public:
-    AndArray(string str) : Array(str) {};
-    void add(Array&) override;
-    void forEach() override;
-    AndArray operator=(const AndArray&);
-};
-
-
-#include "AndArray.h"
-
-void AndArray::add(Array& other) {
-    string str{};
-    for (int i = 0; i < other.size(); i++) {
-        if (this->exists(other[i]) && str.find(to_string(other[i])) == string::npos) {
-            str += to_string(other[i]) + ',';
-        }
-    }
-    AndArray obj(str);
-    *this = obj;
-}
-
-void AndArray::forEach() {
-    for (int i = 0; i < arraySize; i++)
-        if (arrPtr[i] <= 0)
-            arrPtr[i] = 0;
-        else
-            arrPtr[i] = sqrt(arrPtr[i]);
-}
-
-AndArray AndArray::operator=(const AndArray& other) {
-    arraySize = other.arraySize;
-    delete[]arrPtr;
-    arrPtr = new double[arraySize];
-    for (int i = 0; i < arraySize; i++)
-        arrPtr[i] = other.arrPtr[i];
-    return *this;
-}
-
-
-#pragma once
-#include "Array.h"
-
-class OrArray : public Array {
-public:
-    OrArray(string str) : Array(str) {};
-    void add(Array&) override;
-    void forEach() override;
-    OrArray operator=(const OrArray&);
-};
-
-
-#include "OrArray.h"
-
-void OrArray::add(Array& other) {
-    string str{};
-    for (int i = 0; i < this->size(); i++)
-        if (str.find(to_string(arrPtr[i])) == string::npos)
-            str += to_string(arrPtr[i]) + ',';
-    for (int i = 0; i < other.size(); i++)
-        if (str.find(to_string(other[i])) == string::npos)
-            str += to_string(other[i]) + ',';
-    OrArray obj(str);
-    *this = obj;
-}
-
-void OrArray::forEach() {
-    for (int i = 0; i < arraySize; i++)
-        if (arrPtr[i] <= 0)
-            arrPtr[i] = 0;
-        else
-            arrPtr[i] = log(arrPtr[i]);
-}
-
-OrArray OrArray::operator=(const OrArray& other) {
-    arraySize = other.arraySize;
-    delete[]arrPtr;
-    arrPtr = new double[arraySize];
-    for (int i = 0; i < arraySize; i++)
-        arrPtr[i] = other.arrPtr[i];
-    return *this;
+	ifstream A;
+	A.open("A.txt");
+	if (!A.is_open()) {
+		cout << "Error";
+		return 0;
+	}
+	string str;
+	getline(A, str);
+	Stack* top = new Stack;
+	top->data = str[0];
+	top->next = NULL;
+	for (int i = 0; i < str.length(); i++){
+		if (str[i] == 'M' || str[i] == 'm' || (str[i] >= '0' && str[i] <= '9'))
+			pushStack(top, str[i]);
+		else
+			if (str[i] == ')') {
+				char operand1 = popStack(top);
+				char operand2 = popStack(top);
+				char operation = popStack(top);
+				if (operation == 'm')
+					pushStack(top, m(operand1, operand2));
+				else
+					pushStack(top, M(operand1, operand2));
+			}
+	}
+	cout << top->data;
+	A.close();
+	return 0;
 }
