@@ -1,0 +1,125 @@
+#include <iostream>
+using namespace::std;
+using TElem = int;
+
+struct Tree {
+	TElem key;
+	Tree* left, * right;
+};
+
+Tree* first(TElem x) {
+	Tree* root = new Tree;
+	root->key = x;
+	root->left = NULL;
+	root->right = NULL;
+	return root;
+}
+
+bool add(Tree* root, TElem x) {
+	Tree* t = root, * prev = root;
+	while (t) {
+		prev = t;
+		if (t->key == x)
+			return 0;
+		else
+			if (t->key < x)
+				t = t->right;
+			else
+				t = t->left;
+	}
+	Tree* node = first(x);
+	if (x < prev->key)
+		prev->left = node;
+	else
+		prev->right = node;
+	return 1;
+}
+
+TElem leftLeaf(Tree* root) {
+	while (root->left) {
+		root = root->left;
+	}
+	return root->key;
+}
+
+Tree* search(Tree* root, TElem x) {
+	Tree* t = root;
+	while (t) {
+		if (t->key == x)
+			return t;
+		else
+			if (x < t->key)
+				t = t->left;
+			else
+				t = t->right;
+	}
+	return NULL;
+}
+
+unsigned int height(Tree* root) {
+	if (root == 0)
+		return 0;
+	int left, right;
+	if (root->left != NULL) {
+		left = height(root->left);
+	}
+	else
+		left = -1;
+	if (root->right != NULL) {
+		right = height(root->right);
+	}
+	else
+		right = -1;
+	int max;
+	if (left > right)
+		max = left;
+	else
+		max = right;
+	return max + 1;
+}
+
+void print(Tree* root, int level = 0) {
+	if (root->right)
+		print(root->right, level + 1);
+	for (int i = 0; i < level; i++)
+		cout << " ";
+	cout << root->key << endl;
+	if (root->left)
+		print(root->left, level + 1);
+}
+
+bool compare(Tree* root1, Tree* root2) {
+	if (root1->key != root2->key || root1->left == NULL && root2->left != NULL || root1->left != NULL && root2->left == NULL || root1->right == NULL && root2->right != NULL || root1->right != NULL && root2->right == NULL) 
+		return false;
+	if (root1->left == NULL && root1->right == NULL && root2->left == NULL && root2->right == NULL) 
+		return true;
+	if (root1->left == NULL && root2->left == NULL && root1->right != NULL && root2->right != NULL) 
+		return compare(root1->right, root2->right);
+	if (root1->left != NULL && root2->left != NULL && root1->right == NULL && root2->right == NULL) 
+		return compare(root1->left, root2->left);
+	return (compare(root1->left, root2->left) && compare(root1->right, root2->right));
+}
+
+int main() {
+	setlocale(LC_ALL, "RU");
+	int arr1[] = { 5,2,7,9,1,3,4,6,8 };
+	int arr2[] = { 5,2,7,9,1,3,4,6,8 };
+	int N1 = size(arr1);
+	int N2 = size(arr2);
+	Tree* root1 = first(arr1[0]);
+	Tree* root2 = first(arr2[0]);
+	for (int i = 1; i < N1; i++) {
+		add(root1, arr1[i]);
+	}
+	for (int i = 1; i < N2; i++) {
+		add(root2, arr2[i]);
+	}
+	cout << "Самый левый лист (root1): " << leftLeaf(root1) << endl;
+	cout << "search(root1,1): " << search(root1,1) << endl;
+	cout << "search(root1,-1): " << search(root1, -1) << endl;
+	cout << "Высота дерева (root1): " << height(root1) << endl;
+	cout << "root1:" << endl;
+	print(root1);
+	cout << "compare(root1,root2): " << compare(root1, root2) << endl;
+	return 0;
+}
