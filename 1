@@ -1,0 +1,142 @@
+#include <iostream>
+#include <string>
+using namespace::std;
+
+struct Node {
+	int data;
+	Node* next;
+};
+
+void initList(Node* head, int elem) {
+	head->data = elem;
+	head->next = NULL;
+}
+
+void pushFront(Node*& head, int elem) {
+	Node* value = new Node;
+	initList(value, elem);
+	value->next = head;
+	head = value;
+}
+
+void pushBack(Node* head, int elem) {
+	Node* value = new Node;
+	initList(value, elem);
+	while (head->next != NULL)
+		head = head->next;
+	head->next = value;
+}
+
+void pushAfter(Node* head, int elem) {
+	Node* t = new Node;
+	t->data = elem;
+	t->next = head->next;
+	head->next = t;
+}
+
+void popList(Node*& head, Node* p) {
+	if (head == p) {
+		head = head->next;
+		p->next = NULL;
+		delete p;
+	}
+	else {
+		Node* t = head;
+		while (t->next != p)
+			t = t->next;
+		t->next = p->next;
+		p->next = NULL;
+		delete p;
+	}
+}
+
+void printList(Node* head) {
+	int i = 1;
+	while (head != NULL) {
+		cout << i << "-й элемент списка: " << head->data << endl;
+		head = head->next;
+		i++;
+	}
+}
+
+void arrToList(int arr[], int size, Node* head) {
+	initList(head, arr[0]);
+	for (int i = 1; i < size; i++) {
+		pushBack(head, (arr[i]));
+	}
+}
+
+int isContains(Node* head, Node* head1) {
+	Node* t = head1;
+	int count = 1, i = 0;
+	bool f = 1;
+	while (head) {
+		if (head->data == t->data) {
+			i++;
+			if (t->next == NULL)
+				return count - i;
+			t = t->next;
+		}
+		else {
+			t = head1;
+			i = 0;
+			if (i > 0)
+				f = 0;
+		}
+		if (f) {
+			head = head->next;
+			count++;
+		}
+		f = 1;
+	}
+	return -1;
+}
+
+
+bool f(Node*& head, Node* head1, Node* head2) {
+	if (isContains(head, head1) == -1)
+		return 0;
+	Node* t = head;
+	Node* t2 = 0;
+	for (int i = 0; i < isContains(head, head1); i++) {
+		if (i + 1 == isContains(head, head1))
+			t2 = t;
+		t = t->next;
+	}
+	while (head1) {
+		Node* t3 = t;
+		t = t->next;
+		popList(head, t3);
+		head1 = head1->next;
+	}
+	if (t2 == 0) {
+		pushFront(head, head2->data);
+		head2 = head2->next;
+		t2 = head;
+	}
+	while (head2) {
+		pushAfter(t2, head2->data);
+		head2 = head2->next;
+		t2 = t2->next;
+	}
+	return 1;
+}
+
+int main() {
+	setlocale(LC_ALL, "RU");
+	int arr[] = { 1,2,3,4,5 }, arr1[] = { 1,2,3 }, arr2[] = { 3,2,1 };
+	Node* L = new Node, * L1 = new Node, * L2 = new Node;
+	arrToList(arr, size(arr), L);
+	arrToList(arr1, size(arr1), L1);
+	arrToList(arr2, size(arr2), L2);
+	cout << "L\n";
+	printList(L);
+	cout << "\nL1\n";
+	printList(L1);
+	cout << "\nL2\n";
+	printList(L2);
+	f(L, L1, L2);
+	cout << "\nНовый L\n";
+	printList(L);
+	return 0;
+}
