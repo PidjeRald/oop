@@ -1,142 +1,185 @@
 #include <iostream>
-#include <string>
 using namespace::std;
+using TElem = int;
+struct Tree;
+using TElem2 = Tree*;
 
-struct Node {
-	int data;
-	Node* next;
+struct Stack {
+	TElem2 data;
+	Stack* next;
 };
 
-void initList(Node* head, int elem) {
-	head->data = elem;
-	head->next = NULL;
+void initStack(Stack* top, TElem2 x) {
+	top->data = x;
+	top->next = NULL;
 }
 
-void pushFront(Node*& head, int elem) {
-	Node* value = new Node;
-	initList(value, elem);
-	value->next = head;
-	head = value;
+TElem2 popStack(Stack*& top) {
+	Stack* t = top;
+	top = top->next;
+	t->next = NULL;
+	TElem2 x = t->data;
+	delete t;
+	return x;
 }
 
-void pushBack(Node* head, int elem) {
-	Node* value = new Node;
-	initList(value, elem);
-	while (head->next != NULL)
-		head = head->next;
-	head->next = value;
-}
-
-void pushAfter(Node* head, int elem) {
-	Node* t = new Node;
-	t->data = elem;
-	t->next = head->next;
-	head->next = t;
-}
-
-void popList(Node*& head, Node* p) {
-	if (head == p) {
-		head = head->next;
-		p->next = NULL;
-		delete p;
+void pushStack(Stack*& top, TElem2 x) {
+	Stack* t = new Stack;
+	initStack(t, x);
+	if (top) {
+		t->next = top;
+		top = t;
 	}
-	else {
-		Node* t = head;
-		while (t->next != p)
-			t = t->next;
-		t->next = p->next;
-		p->next = NULL;
-		delete p;
-	}
+	else
+		top = t;
 }
 
-void printList(Node* head) {
-	int i = 1;
-	while (head != NULL) {
-		cout << i << "-й элемент списка: " << head->data << endl;
-		head = head->next;
-		i++;
-	}
+struct Tree {
+	TElem key;
+	Tree* left, * right;
+};
+
+Tree* first(TElem x) {
+	Tree* root = new Tree;
+	root->key = x;
+	root->left = NULL;
+	root->right = NULL;
+	return root;
 }
 
-void arrToList(int arr[], int size, Node* head) {
-	initList(head, arr[0]);
-	for (int i = 1; i < size; i++) {
-		pushBack(head, (arr[i]));
+bool add(Tree* root, TElem x) {
+	Tree* t = root, * prev = root;
+	while (t) {
+		prev = t;
+		if (t->key == x)
+			return 0;
+		else
+			if (t->key < x)
+				t = t->right;
+			else
+				t = t->left;
 	}
+	Tree* node = first(x);
+	if (x < prev->key)
+		prev->left = node;
+	else
+		prev->right = node;
+	return 1;
 }
 
-int isContains(Node* head, Node* head1) {
-	Node* t = head1;
-	int count = 1, i = 0;
-	bool f = 1;
-	while (head) {
-		if (head->data == t->data) {
-			i++;
-			if (t->next == NULL)
-				return count - i;
-			t = t->next;
-		}
-		else {
-			t = head1;
-			i = 0;
-			if (i > 0)
-				f = 0;
-		}
-		if (f) {
-			head = head->next;
-			count++;
-		}
-		f = 1;
+TElem leftLeaf(Tree* root) {
+	while (root->left) {
+		root = root->left;
 	}
-	return -1;
+	return root->key;
 }
 
+Tree* search(Tree* root, TElem x) {
+	Tree* t = root;
+	while (t) {
+		if (t->key == x)
+			return t;
+		else
+			if (x < t->key)
+				t = t->left;
+			else
+				t = t->right;
+	}
+	return NULL;
+}
 
-bool f(Node*& head, Node* head1, Node* head2) {
-	if (isContains(head, head1) == -1)
+unsigned int height(Tree* root) {
+	if (root == 0)
 		return 0;
-	Node* t = head;
-	Node* t2 = 0;
-	for (int i = 0; i < isContains(head, head1); i++) {
-		if (i + 1 == isContains(head, head1))
-			t2 = t;
-		t = t->next;
+	int left, right;
+	if (root->left != NULL) {
+		left = height(root->left);
 	}
-	while (head1) {
-		Node* t3 = t;
-		t = t->next;
-		popList(head, t3);
-		head1 = head1->next;
+	else
+		left = -1;
+	if (root->right != NULL) {
+		right = height(root->right);
 	}
-	if (t2 == 0) {
-		pushFront(head, head2->data);
-		head2 = head2->next;
-		t2 = head;
+	else
+		right = -1;
+	int max;
+	if (left > right)
+		max = left;
+	else
+		max = right;
+	return max + 1;
+}
+
+void print(Tree* root, int level = 0) {
+	if (root->right)
+		print(root->right, level + 1);
+	for (int i = 0; i < level; i++)
+		cout << " ";
+	cout << root->key << endl;
+	if (root->left)
+		print(root->left, level + 1);
+}
+
+/*bool compare(Tree* root1, Tree* root2) {
+	if (root1->key != root2->key || root1->left == NULL && root2->left != NULL || root1->left != NULL && root2->left == NULL || root1->right == NULL && root2->right != NULL || root1->right != NULL && root2->right == NULL)
+		return false;
+	if (root1->left == NULL && root1->right == NULL && root2->left == NULL && root2->right == NULL)
+		return true;
+	if (root1->left == NULL && root2->left == NULL && root1->right != NULL && root2->right != NULL)
+		return compare(root1->right, root2->right);
+	if (root1->left != NULL && root2->left != NULL && root1->right == NULL && root2->right == NULL)
+		return compare(root1->left, root2->left);
+	return (compare(root1->left, root2->left) && compare(root1->right, root2->right));
+}*/
+
+bool compare(Tree* root1, Tree* root2) {
+	Stack* s1 = NULL, * s2 = NULL;
+	while (root1 && root2) {
+		cout << root1->key << endl;
+		if (root1->key != root2->key)
+			return 0;
+		if (root1->right && root2->right) {
+			pushStack(s1, root1->right);
+			pushStack(s2, root2->right);
+		}
+		else
+			if (root1->right || root2->right)
+				return 0;
+		if (root1->left && root2->left) {
+			root1 = root1->left;
+			root2 = root2->left;
+		}
+		else
+			if (root1->left || root2->left)
+				return 0;
+			else
+				if (s1 && s2) {
+					root1 = popStack(s1);
+					root2 = popStack(s2);
+				}
+				else
+					return 1;
 	}
-	while (head2) {
-		pushAfter(t2, head2->data);
-		head2 = head2->next;
-		t2 = t2->next;
-	}
+	if (root1 || root2)
+		return 0;
 	return 1;
 }
 
 int main() {
 	setlocale(LC_ALL, "RU");
-	int arr[] = { 1,2,3,4,5 }, arr1[] = { 1,2,3 }, arr2[] = { 3,2,1 };
-	Node* L = new Node, * L1 = new Node, * L2 = new Node;
-	arrToList(arr, size(arr), L);
-	arrToList(arr1, size(arr1), L1);
-	arrToList(arr2, size(arr2), L2);
-	cout << "L\n";
-	printList(L);
-	cout << "\nL1\n";
-	printList(L1);
-	cout << "\nL2\n";
-	printList(L2);
-	f(L, L1, L2);
-	cout << "\nНовый L\n";
-	printList(L);
+	int arr1[] = { 5,3,7,1,4,6,9 };
+	int arr2[] = { 5,3,7,1,4,6,9 };
+	int N1 = size(arr1);
+	int N2 = size(arr2);
+	Tree* root1 = first(arr1[0]);
+	Tree* root2 = first(arr2[0]);
+	for (int i = 1; i < N1; i++) {
+		add(root1, arr1[i]);
+	}
+	for (int i = 1; i < N2; i++) {
+		add(root2, arr2[i]);
+	}
+	print(root1);
+	cout << "compare(root1,root2): " << compare(root1, root2) << endl;
 	return 0;
 }
