@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 using namespace::std;
 using TElem = int;
 struct Tree;
@@ -165,21 +166,108 @@ bool compare(Tree* root1, Tree* root2) {
 	return 1;
 }
 
+void formulaToTree(string str, Tree*& root) {
+	str = " " + str + " ";
+	for (int i = 0; i < str.length(); i++)
+		if ((str[i] == '+' || str[i] == '-') && str[i - 2] != '(' && str[i - 2] != ')') {
+			root = first(str[i]);
+			string left{}, right{};
+			left.append(str, 1, i - 1);
+			formulaToTree(left, root->left);
+			right.append(str, i + 1, str.length() - i);
+			formulaToTree(right, root->right);
+			str = {};
+		}
+	for (int i = 0; i < str.length(); i++)
+		if (str[i] == '*' || str[i] == '/') {
+			root = first(str[i]);
+			string left{}, right{};
+			left.append(str, 1, i - 1);
+			formulaToTree(left, root->left);
+			right.append(str, i + 1, str.length() - i);
+			formulaToTree(right, root->right);
+			str = {};
+		}
+	for (int i = 0; i < str.length(); i++)
+		if ((str[i] == '+' || str[i] == '-') && str[i - 2] == '(' && str[i + 2] == ')') {
+			root = first(str[i]);
+			string left{}, right{};
+			left.append(str, 1, i - 1);
+			formulaToTree(left, root->left);
+			right.append(str, i + 1, str.length() - i);
+			formulaToTree(right, root->right);
+			str = {};
+		}
+	for (int i = 0; i < str.length(); i++)
+		if (str[i] <= '9' && str[i] >= '0' || str[i] >= 'a' && str[i] <= 'z')
+			root = first(str[i]);
+}
+
+void f(Tree*& root) {
+	if (root) {
+		if (root->left && root->right) {
+			if (root->key == '*') {
+				if (root->right->key >= 'a' && root->right->key <= 'z' && root->left->key == '+' || root->left->key == '-') {
+					if (root->left->left->key >= 'a' && root->left->left->key <= 'z' && root->left->right->key >= 'a' && root->left->right->key <= 'z') {
+						TElem t = root->left->right->key;
+						root->left->right->key = root->right->key;
+						root->key = root->left->key;
+						root->left->key = root->right->key = '*';
+						root->right->left = first(t);
+						root->right->right = first(root->left->right->key);
+					}
+
+				}
+				if (root->left->key >= 'a' && root->left->key <= 'z' && root->right->key == '+' || root->right->key == '-') {
+					if (root->right->left->key >= 'a' && root->right->left->key <= 'z' && root->right->right->key >= 'a' && root->right->right->key <= 'z') {
+						TElem t = root->right->left->key;
+						root->right->left->key = root->left->key;
+						root->key = root->right->key;
+						root->left->key = root->right->key = '*';
+						root->left->right = first(t);
+						root->left->left = first(root->right->left->key);
+					}
+				}
+			}
+		}
+		f(root->left);
+		f(root->right);
+	}
+}
+
+void f2(Tree*& root) {
+	if (root->left && root->right) {
+		int a = height(root->left) - height(root->right);
+		if (abs(a) >= 1) {
+			if (a <= -1) {
+				f2(root->right);
+				Tree* q = root->right;
+				root->right = q->left;
+				q->left = root;
+				root = q;
+			}
+			if (a >= 1) {
+				f2(root->left);
+				Tree* q = root->left;
+				root->left = q->right;
+				q->right = root;
+				root = q;
+			}
+		}
+	}
+}
+
 int main() {
 	setlocale(LC_ALL, "RU");
-	int arr1[] = { 5,3,7,1,4,6,9 };
-	int arr2[] = { 5,3,7,1,4,6,9 };
-	int N1 = size(arr1);
-	int N2 = size(arr2);
-	Tree* root1 = first(arr1[0]);
-	Tree* root2 = first(arr2[0]);
-	for (int i = 1; i < N1; i++) {
-		add(root1, arr1[i]);
+	int arr[] = { 7,8,3,1,5,4,6 }; // 7,8,3,1,5,4,6 | 3,1,7,5,4,6,8
+	int N = size(arr);
+	Tree* root = first(arr[0]);
+	for (int i = 1; i < N; i++) {
+		add(root, arr[i]);
 	}
-	for (int i = 1; i < N2; i++) {
-		add(root2, arr2[i]);
-	}
-	print(root1);
-	cout << "compare(root1,root2): " << compare(root1, root2) << endl;
+	print(root);
+	cout << "\n=======\n\n";
+	f2(root);
+	print(root);
 	return 0;
 }
