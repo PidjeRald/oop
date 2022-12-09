@@ -80,10 +80,10 @@ void printWord(TrieNode* root, string key = "") {
 
 int main() {
 	TrieNode* root = init();
-	string word1 = "pen";
-	string word2 = "huy";
-	string word3 = "her";
-	string word4 = "pencil";
+	string word1 = "";
+	string word2 = "";
+	string word3 = "";
+	string word4 = "";
 	insert(root, word1);
 	insert(root, word2);
 	insert(root, word3);
