@@ -1,247 +1,98 @@
 #include <iostream>
 using namespace::std;
-using TElem = char;
-struct Tree;
-using TElem2 = Tree*;
+const int ALPHABET_SIZE = 26;
 
-struct Stack {
-	TElem2 data;
-	Stack* next;
+struct TrieNode {
+	TrieNode* alphabet[ALPHABET_SIZE];
+	bool isEndOfWord;
 };
 
-void initStack(Stack* top, TElem2 x) {
-	top->data = x;
-	top->next = NULL;
+TrieNode* init() {
+	TrieNode* p = new TrieNode;
+	p->isEndOfWord = false;
+	for (int i = 0; i < ALPHABET_SIZE; i++)
+		p->alphabet[i] = NULL;
+	return p;
 }
 
-TElem2 popStack(Stack*& top) {
-	Stack* t = top;
-	top = top->next;
-	t->next = NULL;
-	TElem2 x = t->data;
-	delete t;
-	return x;
-}
-
-void pushStack(Stack*& top, TElem2 x) {
-	Stack* t = new Stack;
-	initStack(t, x);
-	if (top) {
-		t->next = top;
-		top = t;
+void insert(TrieNode* root, string key) {
+	TrieNode* p = root;
+	for (int i = 0; i < key.length(); i++) {
+		int index = key[i] - 'a';
+		if (!p->alphabet[index])
+			p->alphabet[index] = init();
+		p = p->alphabet[index];
 	}
-	else
-		top = t;
+	p->isEndOfWord = true;
 }
 
-struct Tree {
-	TElem key;
-	Tree* left, * right;
-};
+bool search(TrieNode* root, string key) {
+	TrieNode* p = root;
+	for (int i = 0; i < key.length(); i++) {
+		int index = key[i] - 'a';
+		if (!p->alphabet[index])
+			return false;
+		p = p->alphabet[index];
+	}
+	return p->isEndOfWord;
+}
 
-Tree* first(TElem x) {
-	Tree* root = new Tree;
-	root->key = x;
-	root->left = NULL;
-	root->right = NULL;
+bool isEmpty(TrieNode* root) {
+	for (int i = 0; i < ALPHABET_SIZE; i++)
+		if (root->alphabet[i])
+			return false;
+	return true;
+}
+
+TrieNode* remove(TrieNode* root, string key, int level = 0) {
+	if (!root)
+		return NULL;
+	if (level == key.length()) {
+		if (root->isEndOfWord)
+			root->isEndOfWord = false;
+		if (isEmpty(root)) {
+			delete root;
+			root = NULL;
+		}
+		return root;
+	}
+	int index = key[level] - 'a';
+	root->alphabet[index] = remove(root->alphabet[index], key, level + 1);
+	if (isEmpty(root) && !root->isEndOfWord) {
+		delete root;
+		root = NULL;
+	}
 	return root;
 }
 
-bool add(Tree* root, TElem x) {
-	Tree* t = root, * prev = root;
-	while (t) {
-		prev = t;
-		if (t->key == x)
-			return 0;
-		else
-			if (t->key < x)
-				t = t->right;
-			else
-				t = t->left;
+void printWord(TrieNode* root, string key = "") {
+	TrieNode* p = root;
+	if (p->isEndOfWord) {
+		cout << key << "\n";
 	}
-	Tree* node = first(x);
-	if (x < prev->key)
-		prev->left = node;
-	else
-		prev->right = node;
-	return 1;
-}
-
-TElem leftLeaf(Tree* root) {
-	while (root->left) {
-		root = root->left;
-	}
-	return root->key;
-}
-
-Tree* search(Tree* root, TElem x) {
-	Tree* t = root;
-	while (t) {
-		if (t->key == x)
-			return t;
-		else
-			if (x < t->key)
-				t = t->left;
-			else
-				t = t->right;
-	}
-	return NULL;
-}
-
-unsigned int height(Tree* root) {
-	if (root == 0)
-		return 0;
-	int left, right;
-	if (root->left != NULL) {
-		left = height(root->left);
-	}
-	else
-		left = -1;
-	if (root->right != NULL) {
-		right = height(root->right);
-	}
-	else
-		right = -1;
-	int max;
-	if (left > right)
-		max = left;
-	else
-		max = right;
-	return max + 1;
-}
-
-void print(Tree* root, int level = 0) {
-	if (root->right)
-		print(root->right, level + 1);
-	for (int i = 0; i < level; i++)
-		cout << " ";
-	cout << root->key << endl;
-	if (root->left)
-		print(root->left, level + 1);
-}
-
-/*bool compare(Tree* root1, Tree* root2) {
-	if (root1->key != root2->key || root1->left == NULL && root2->left != NULL || root1->left != NULL && root2->left == NULL || root1->right == NULL && root2->right != NULL || root1->right != NULL && root2->right == NULL)
-		return false;
-	if (root1->left == NULL && root1->right == NULL && root2->left == NULL && root2->right == NULL)
-		return true;
-	if (root1->left == NULL && root2->left == NULL && root1->right != NULL && root2->right != NULL)
-		return compare(root1->right, root2->right);
-	if (root1->left != NULL && root2->left != NULL && root1->right == NULL && root2->right == NULL)
-		return compare(root1->left, root2->left);
-	return (compare(root1->left, root2->left) && compare(root1->right, root2->right));
-}*/
-
-bool compare(Tree* root1, Tree* root2) {
-	Stack* s1 = NULL, * s2 = NULL;
-	while (root1 && root2) {
-		cout << root1->key << endl;
-		if (root1->key != root2->key)
-			return 0;
-		if (root1->right && root2->right) {
-			pushStack(s1, root1->right);
-			pushStack(s2, root2->right);
+	for (int i = 0; i < ALPHABET_SIZE; i++) {
+		if (p->alphabet[i]) {
+			char letter = i + 'a';
+			printWord(p->alphabet[i], key + letter);
 		}
-		else
-			if (root1->right || root2->right)
-				return 0;
-		if (root1->left && root2->left) {
-			root1 = root1->left;
-			root2 = root2->left;
-		}
-		else
-			if (root1->left || root2->left)
-				return 0;
-			else
-				if (s1 && s2) {
-					root1 = popStack(s1);
-					root2 = popStack(s2);
-				}
-				else
-					return 1;
-	}
-	if (root1 || root2)
-		return 0;
-	return 1;
-}
-
-void formulaToTree(string str, Tree*& root) {
-	str = " " + str + " ";
-	for (int i = 0; i < str.length(); i++)
-		if ((str[i] == '+' || str[i] == '-') && str[i - 2] != '(' && str[i - 2] != ')') {
-			root = first(str[i]);
-			string left{}, right{};
-			left.append(str, 1, i - 1);
-			formulaToTree(left, root->left);
-			right.append(str, i + 1, str.length() - i);
-			formulaToTree(right, root->right);
-			str = {};
-		}
-	for (int i = 0; i < str.length(); i++)
-		if (str[i] == '*' || str[i] == '/') {
-			root = first(str[i]);
-			string left{}, right{};
-			left.append(str, 1, i - 1);
-			formulaToTree(left, root->left);
-			right.append(str, i + 1, str.length() - i);
-			formulaToTree(right, root->right);
-			str = {};
-		}
-	for (int i = 0; i < str.length(); i++)
-		if ((str[i] == '+' || str[i] == '-') && str[i - 2] == '(' && str[i + 2] == ')') {
-			root = first(str[i]);
-			string left{}, right{};
-			left.append(str, 1, i - 1);
-			formulaToTree(left, root->left);
-			right.append(str, i + 1, str.length() - i);
-			formulaToTree(right, root->right);
-			str = {};
-		}
-	for (int i = 0; i < str.length(); i++)
-		if (str[i] <= '9' && str[i] >= '0' || str[i] >='a' && str[i] <= 'z')
-			root = first(str[i]);
-}
-
-void f(Tree*& root) {
-	if (root) {
-		if (root->left && root->right) {
-			if (root->key == '*') {
-				if (root->right->key >= 'a' && root->right->key <= 'z' && root->left->key == '+' || root->left->key == '-') {
-					if (root->left->left->key >= 'a' && root->left->left->key <= 'z' && root->left->right->key >= 'a' && root->left->right->key <= 'z') {
-						TElem t = root->left->right->key;
-						root->left->right->key = root->right->key;
-						root->key = root->left->key;
-						root->left->key = root->right->key = '*';
-						root->right->left = first(t);
-						root->right->right = first(root->left->right->key);
-					}
-
-				}
-				if (root->left->key >= 'a' && root->left->key <= 'z' && root->right->key == '+' || root->right->key == '-') {
-					if (root->right->left->key >= 'a' && root->right->left->key <= 'z' && root->right->right->key >= 'a' && root->right->right->key <= 'z') {
-						TElem t = root->right->left->key;
-						root->right->left->key = root->left->key;
-						root->key = root->right->key;
-						root->left->key = root->right->key = '*';
-						root->left->right = first(t);
-						root->left->left = first(root->right->left->key);
-					}
-				}
-			}
-		}
-		f(root->left);
-		f(root->right);
 	}
 }
 
 int main() {
-	setlocale(LC_ALL, "RU");
-	string str = "c*(a-b)";
-	Tree* root;
-	formulaToTree(str, root);
-	print(root);
-	f(root);
-	cout << endl;
-	print(root);
+	TrieNode* root = init();
+	string word1 = "pen";
+	string word2 = "huy";
+	string word3 = "her";
+	string word4 = "pencil";
+	insert(root, word1);
+	insert(root, word2);
+	insert(root, word3);
+	insert(root, word4);
+	printWord(root);
+	cout << search(root, word4);
+	remove(root, word4);
+	cout << "\n=====\n";
+	printWord(root);
+	cout << search(root, word4);
 	return 0;
 }
