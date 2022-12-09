@@ -1,10 +1,8 @@
-https://sun9-8.userapi.com/impg/S6XE7QLLlkoOdRC5_1eZDvA5YhtIKI7q38RO9g/est3ypmtV3c.jpg?size=1117x681&quality=96&sign=7c0953cf4a7b1a642aa870224d277c63&type=album
 #include <iostream>
 #include <cmath>
 using namespace::std;
 using TElem = int;
-struct Tree;
-using TElem2 = Tree*;
+using TElem2 = int;
 
 struct Stack {
 	TElem2 data;
@@ -122,153 +120,157 @@ void print(Tree* root, int level = 0) {
 		print(root->left, level + 1);
 }
 
-/*bool compare(Tree* root1, Tree* root2) {
-	if (root1->key != root2->key || root1->left == NULL && root2->left != NULL || root1->left != NULL && root2->left == NULL || root1->right == NULL && root2->right != NULL || root1->right != NULL && root2->right == NULL)
-		return false;
-	if (root1->left == NULL && root1->right == NULL && root2->left == NULL && root2->right == NULL)
-		return true;
-	if (root1->left == NULL && root2->left == NULL && root1->right != NULL && root2->right != NULL)
-		return compare(root1->right, root2->right);
-	if (root1->left != NULL && root2->left != NULL && root1->right == NULL && root2->right == NULL)
-		return compare(root1->left, root2->left);
-	return (compare(root1->left, root2->left) && compare(root1->right, root2->right));
-}*/
-
-bool compare(Tree* root1, Tree* root2) {
-	Stack* s1 = NULL, * s2 = NULL;
-	while (root1 && root2) {
-		cout << root1->key << endl;
-		if (root1->key != root2->key)
-			return 0;
-		if (root1->right && root2->right) {
-			pushStack(s1, root1->right);
-			pushStack(s2, root2->right);
-		}
-		else
-			if (root1->right || root2->right)
-				return 0;
-		if (root1->left && root2->left) {
-			root1 = root1->left;
-			root2 = root2->left;
-		}
-		else
-			if (root1->left || root2->left)
-				return 0;
-			else
-				if (s1 && s2) {
-					root1 = popStack(s1);
-					root2 = popStack(s2);
-				}
-				else
-					return 1;
+struct avlTree {
+	TElem key;
+	avlTree* left, * right;
+	int height;
+	avlTree(int key) {
+		this->key = key;
+		left = right = 0;
+		height = 1;
 	}
-	if (root1 || root2)
+};
+
+avlTree* avlFirst(TElem x) {
+	avlTree* root = new avlTree(x);
+	return root;
+}
+
+int avlHeight(avlTree* root) {
+	if (root)
+		return root->height;
+	else
 		return 0;
-	return 1;
 }
 
-void formulaToTree(string str, Tree*& root) {
-	str = " " + str + " ";
-	for (int i = 0; i < str.length(); i++)
-		if ((str[i] == '+' || str[i] == '-') && str[i - 2] != '(' && str[i - 2] != ')') {
-			root = first(str[i]);
-			string left{}, right{};
-			left.append(str, 1, i - 1);
-			formulaToTree(left, root->left);
-			right.append(str, i + 1, str.length() - i);
-			formulaToTree(right, root->right);
-			str = {};
-		}
-	for (int i = 0; i < str.length(); i++)
-		if (str[i] == '*' || str[i] == '/') {
-			root = first(str[i]);
-			string left{}, right{};
-			left.append(str, 1, i - 1);
-			formulaToTree(left, root->left);
-			right.append(str, i + 1, str.length() - i);
-			formulaToTree(right, root->right);
-			str = {};
-		}
-	for (int i = 0; i < str.length(); i++)
-		if ((str[i] == '+' || str[i] == '-') && str[i - 2] == '(' && str[i + 2] == ')') {
-			root = first(str[i]);
-			string left{}, right{};
-			left.append(str, 1, i - 1);
-			formulaToTree(left, root->left);
-			right.append(str, i + 1, str.length() - i);
-			formulaToTree(right, root->right);
-			str = {};
-		}
-	for (int i = 0; i < str.length(); i++)
-		if (str[i] <= '9' && str[i] >= '0' || str[i] >= 'a' && str[i] <= 'z')
-			root = first(str[i]);
+void avlPrint(avlTree* root, int level = 0) {
+	if (root->right)
+		avlPrint(root->right, level + 1);
+	for (int i = 0; i < level; i++)
+		cout << " ";
+	cout << root->key << endl;
+	if (root->left)
+		avlPrint(root->left, level + 1);
 }
 
-void f(Tree*& root) {
+void fixHeight(avlTree* root) {
+	int leftHeight = avlHeight(root->left);
+	int rightHeight = avlHeight(root->right);
+	root->height = max(leftHeight, rightHeight) + 1;
+}
+
+int bfactor(avlTree* root) {
+	return avlHeight(root->right) - avlHeight(root->left);
+}
+
+avlTree* rotateRight(avlTree* root) {
+	avlTree* q = root->left;
+	root->left = q->right;
+	q->right = root;
+	fixHeight(root);
+	fixHeight(q);
+	return q;
+}
+
+avlTree* rotateLeft(avlTree* root) {
+	avlTree* q = root->right;
+	root->right = q->left;
+	q->left = root;
+	fixHeight(root);
+	fixHeight(q);
+	return q;
+}
+
+avlTree* balance(avlTree* root) {
+	fixHeight(root);
+	if (bfactor(root) == 2) {
+		if (bfactor(root->right) < 0)
+			root->right = rotateRight(root->right);
+		return rotateLeft(root);
+	}
+	if (bfactor(root) == -2) {
+		if (bfactor(root->left) > 0)
+			root->left = rotateLeft(root->left);
+		return rotateRight(root);
+	}
+	return root;
+}
+
+avlTree* avlAdd(avlTree*& root, TElem x) {
+	if (!root)
+		return new avlTree(x);
+	if (x < root->key)
+		root->left = avlAdd(root->left, x);
+	if (x > root->key)
+		root->right = avlAdd(root->right, x);
+	return balance(root);
+}
+
+avlTree* findmin(avlTree* root) {
+	while (root->left)
+		root = root->left;
+	return root;
+}
+
+avlTree* removemin(avlTree* root)
+{
+	if (root->left == 0)
+		return root->right;
+	root->left = removemin(root->left);
+	return balance(root);
+}
+
+avlTree* remove(avlTree* root, int x)
+{
+	if (!root)
+		return 0;
+	if (x < root->key)
+		root->left = remove(root->left, x);
+	else
+		if (x > root->key)
+			root->right = remove(root->right, x);
+		else
+		{
+			avlTree* l = root->left;
+			avlTree* r = root->right;
+			delete root;
+			if (!r)
+				return l;
+			avlTree* min = findmin(r);
+			min->right = removemin(r);
+			min->left = l;
+			return balance(min);
+		}
+	return balance(root);
+}
+
+void treeToStack(Tree* root, Stack*& s) {
 	if (root) {
-		if (root->left && root->right) {
-			if (root->key == '*') {
-				if (root->right->key >= 'a' && root->right->key <= 'z' && root->left->key == '+' || root->left->key == '-') {
-					if (root->left->left->key >= 'a' && root->left->left->key <= 'z' && root->left->right->key >= 'a' && root->left->right->key <= 'z') {
-						TElem t = root->left->right->key;
-						root->left->right->key = root->right->key;
-						root->key = root->left->key;
-						root->left->key = root->right->key = '*';
-						root->right->left = first(t);
-						root->right->right = first(root->left->right->key);
-					}
-
-				}
-				if (root->left->key >= 'a' && root->left->key <= 'z' && root->right->key == '+' || root->right->key == '-') {
-					if (root->right->left->key >= 'a' && root->right->left->key <= 'z' && root->right->right->key >= 'a' && root->right->right->key <= 'z') {
-						TElem t = root->right->left->key;
-						root->right->left->key = root->left->key;
-						root->key = root->right->key;
-						root->left->key = root->right->key = '*';
-						root->left->right = first(t);
-						root->left->left = first(root->right->left->key);
-					}
-				}
-			}
-		}
-		f(root->left);
-		f(root->right);
+		treeToStack(root->left, s);
+		pushStack(s, root->key);
+		treeToStack(root->right, s);
 	}
 }
 
-void f2(Tree*& root) {
-	if (root->left && root->right) {
-		int a = height(root->left) - height(root->right);
-		if (abs(a) >= 1) {
-			if (a <= -1) {
-				f2(root->right);
-				Tree* q = root->right;
-				root->right = q->left;
-				q->left = root;
-				root = q;
-			}
-			if (a >= 1) {
-				f2(root->left);
-				Tree* q = root->left;
-				root->left = q->right;
-				q->right = root;
-				root = q;
-			}
-		}
-	}
+void treeToAvlTree(Tree* root1, avlTree*& root2) {
+	Stack* s = NULL;
+	treeToStack(root1, s);
+	while (s)
+		root2 = avlAdd(root2, popStack(s));
 }
 
 int main() {
 	setlocale(LC_ALL, "RU");
-	int arr[] = { 7,8,3,1,5,4,6 }; // 7,8,3,1,5,4,6 | 3,1,7,5,4,6,8
+	int arr[] = { 10,12,7,8,3,1,5,4,6,40,26,43 }; // 7,8,3,1,5,4,6 | 3,1,7,5,4,6,8
 	int N = size(arr);
-	Tree* root = first(arr[0]);
+	Tree* root1 = first(arr[0]);
 	for (int i = 1; i < N; i++) {
-		add(root, arr[i]);
+		add(root1, arr[i]);
 	}
-	print(root);
+	print(root1);
 	cout << "\n=======\n\n";
-	f2(root);
-	print(root);
+	avlTree* root2 = NULL;
+	treeToAvlTree(root1, root2);
+	avlPrint(root2);
 	return 0;
 }
